@@ -1,7 +1,7 @@
 x-common-config: &common-config
   image: sammyne/nanobot:latest
   volumes:
-    - ./.nanobot:/root/.nanobot
+    - ./.nanobot/qingwen:/root/.nanobot
 
 services:
   nanobot-gateway:
@@ -11,8 +11,6 @@ services:
       - .env
     command: ["gateway"]
     restart: unless-stopped
-    ports:
-      - 18790:18790
     deploy:
       resources:
         limits:
