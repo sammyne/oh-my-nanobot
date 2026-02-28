@@ -1,0 +1,45 @@
+x-nvidia-litellm-params: &nvidia-litellm-params
+  api_key: os.environ/NVIDIA_API_KEY
+  api_base: https://integrate.api.nvidia.com/v1
+
+x-modelscope-litellm-params: &modelscope-litellm-params
+  api_key: os.environ/MODELSCOPE_API_KEY
+  api_base: https://api-inference.modelscope.cn/v1
+
+model_list:
+- model_name: glm-4.7
+  litellm_params:
+    model: openai/z-ai/glm4.7
+    <<: *nvidia-litellm-params
+- model_name: kimi-k2.5
+  litellm_params:
+    # https://docs.litellm.ai/docs/proxy/docker_quick_start#understanding-model-configuration
+    model: openai/moonshotai/Kimi-K2.5
+    <<: *modelscope-litellm-params
+- model_name: kimi-k2.5
+  litellm_params:
+    # https://docs.litellm.ai/docs/proxy/docker_quick_start#understanding-model-configuration
+    model: openai/moonshotai/kimi-k2.5
+    <<: *nvidia-litellm-params
+- model_name: minimax-m2.5
+  litellm_params:
+    model: openai/MiniMax/MiniMax-M2.5
+    <<: *modelscope-litellm-params
+- model_name: minimax-m2.5
+  litellm_params:
+    model: openai/minimaxai/minimax-m2.5
+    <<: *nvidia-litellm-params
+
+litellm_settings:
+  # set_verbose: True  # Uncomment this if you want to see verbose logs; not recommended in production
+  # drop_params: True
+  # success_callback: ["prometheus"]
+  # max_budget: 100 
+  # budget_duration: 30d
+  num_retries: 3
+  request_timeout: 600
+  telemetry: False
+
+general_settings:
+  # 客户端访问网关用的 Bearer 令牌
+  master_key: hello-world

@@ -1,0 +1,92 @@
+x-nanobot-common-config: &nanobot-common-config
+  image: sammyne/nanobot:latest
+  volumes:
+    - ./.nanobot:/root/.nanobot
+
+services:
+  nanobot-gateway:
+    container_name: nanobot-gateway
+    <<: *nanobot-common-config
+    env_file:
+      - .env
+    command: ["gateway"]
+    restart: unless-stopped
+    ports:
+      - 18790:18790
+    depends_on:
+      - litellm
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+  
+  nanobot-cli:
+    <<: *nanobot-common-config
+    profiles:
+      - cli
+    command: ["status"]
+    stdin_open: true
+    tty: true
+
+  litellm:
+    image: litellm/litellm:v1.81.3-stable
+    #########################################
+    ## Uncomment these lines to start proxy with a config.yaml file ##
+    volumes:
+     - ./static/litellm.yaml:/app/config.yaml
+    command:
+     - "--config=/app/config.yaml"
+    ##############################################
+    ports:
+      - "4000:4000" # Map the container port to the host, change the host port if necessary
+    environment:
+      DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
+      STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
+    env_file:
+      - .env # Load local .env file
+    depends_on:
+      - db  # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
+    healthcheck:  # Defines the health check configuration for the container
+      test:
+        - CMD-SHELL
+        - python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"  # Command to execute for health check
+      interval: 30s  # Perform health check every 30 seconds
+      timeout: 10s   # Health check command times out after 10 seconds
+      retries: 3     # Retry up to 3 times if health check fails
+      start_period: 40s  # Wait 40 seconds after container start before beginning health checks
+
+  db:
+    image: postgres:16.12-trixie
+    restart: always
+    container_name: litellm_db
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: llmproxy
+      POSTGRES_PASSWORD: dbpassword9090
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./_data/postgres:/var/lib/postgresql/data # Persists Postgres data across container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d litellm -U llmproxy"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  # prometheus:
+  #   image: prom/prometheus:v3.9.1
+  #   user: root
+  #   volumes:
+  #     - ./_data/prometheus:/prometheus
+  #     - ./static/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   command:
+  #     - "--config.file=/etc/prometheus/prometheus.yml"
+  #     - "--storage.tsdb.path=/prometheus"
+  #     - "--storage.tsdb.retention.time=15d"
+  #   restart: always
