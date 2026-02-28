@@ -1,3 +1,5 @@
 /.nanobot/
 
+.env
+
 _*

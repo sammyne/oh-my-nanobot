@@ -9,7 +9,23 @@ RUN wget https://github.com/HKUDS/nanobot/archive/$REV.tar.gz -O nanobot.tar.gz
 RUN tar -xzf nanobot.tar.gz --strip-components=1 && rm nanobot.tar.gz
 
 
+FROM busybox:1.37.0-glibc AS skills
+
+ARG TAVILY_REV=f63aeef
+
+WORKDIR /output/tavily-search
+
+RUN wget https://github.com/tavily-ai/skills/archive/$TAVILY_REV.tar.gz -O /tmp/tavily-skills.tgz
+
+RUN mkdir -p /tmp/tavily-skills && tar -xzf /tmp/tavily-skills.tgz --strip-components=1 -C /tmp/tavily-skills
+
+RUN mv /tmp/tavily-skills/skills/tavily/search/* .
+
+
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+# Use Aliyun PyPI mirror for faster package downloads
+ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 
 RUN sed -i 's/deb.debian.org/mirrors.tencent.com/g' /etc/apt/sources.list.d/debian.sources &&\
     sed -i 's|security.debian.org/debian-security|mirrors.tencent.com/debian-security|g' /etc/apt/sources.list.d/debian.sources
@@ -37,6 +53,10 @@ RUN mkdir -p nanobot bridge && touch nanobot/__init__.py && \
 # Copy the full source and install
 COPY --from=repo /nanobot/nanobot/ nanobot/
 COPY --from=repo /nanobot/bridge/ bridge/
+
+# 添加为 nanobot 的内置技能
+COPY --from=skills /output nanobot/skills
+
 RUN uv pip install --system --no-cache .
 
 # Build the WhatsApp bridge

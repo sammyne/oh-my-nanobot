@@ -7,6 +7,8 @@ services:
   nanobot-gateway:
     container_name: nanobot-gateway
     <<: *common-config
+    env_file:
+      - .env
     command: ["gateway"]
     restart: unless-stopped
     ports:

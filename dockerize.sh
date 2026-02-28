@@ -2,7 +2,7 @@
 
 rev=v0.1.4.post2
 
-repo_tag=sammyne/nanobot:${rev//v}
+repo_tag=sammyne/nanobot:${rev//v}-`git rev-parse --short HEAD`
 repo_tag_latest=sammyne/nanobot:latest
 
 docker build --build-arg REV=$rev -t $repo_tag .
