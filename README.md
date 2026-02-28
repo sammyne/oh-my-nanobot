@@ -20,10 +20,19 @@ docker compose run --rm nanobot-cli onboard
 
 ### 2.3. 调整配置
 
-根据需要更新 .nanobot/config.json 的配置项，重点关注
+#### 2.3.1. .nanobot/config.json
+
+根据需要更新配置项，重点关注
 - `agents.default.model`
 - 【可选】`channel` 开启一种通道
 - `providers` 提供截图 LLM 服务依赖的配置
+
+#### 2.3.2. .env
+添加如下配置项
+
+配置项 | 说明
+------|-----------
+`TAVILY_API_KEY` | tavily 搜索服务依赖的 API Key，从 https://app.tavily.com/home 申请即可
 
 ### 2.4. 启动网关
 
