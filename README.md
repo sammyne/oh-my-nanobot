@@ -1,5 +1,14 @@
 # 个人定制版 nanobot
 
+<p align="center">
+  <!-- Keep these links. Translations will automatically update with the README. -->
+  <a href="https://github.com/sammyne/oh-my-nanobot">中文</a> |
+  <a href="https://www.readme-i18n.com/sammyne/oh-my-nanobot?lang=en">English</a>
+</p>
+
+此项目是基于 [HKUDS/nanobot](https://github.com/HKUDS/nanobot) 的个人定制版本，主要拓展
+增加了基于 [Tavily 搜索](https://github.com/tavily-ai/skills/tree/main/skills/tavily/search) 的内置技能。
+
 ## 1. 环境
 - docker 24.0.6, build ed223bc
 - docker-compose v2.21.0
@@ -39,6 +48,8 @@ docker compose run --rm nanobot-cli onboard
 ```bash
 docker compose up -d nanobot-gateway
 ```
+
+后续通过配置的通道即可与 nanobot 交互。
 
 ## 3. 文件说明
 - Dockerfile 和 docker-compose.yml 基于 HKUDS/nanobot@v0.1.4.post2 的副本改造得到
